@@ -6,3 +6,4 @@ Trabalho universitário com tema: Eficiência Energética: Previsão de Demanda 
 
 ---
 
+Objetivo: Um modelo que otimize a alocação de recursos eletricos utilizando padrões por um sistemaa aumático (ML).
