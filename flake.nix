@@ -17,6 +17,8 @@
           ruff
           python3
           python3Packages.torchvision
+          python3Packages.ultralytics
+          python3Packages.opencv4Full
         ];
       };
     };
