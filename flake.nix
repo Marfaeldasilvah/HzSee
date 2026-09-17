@@ -15,12 +15,8 @@
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = with pkgs; [
           ruff
-          python314
-
-          #(pkgs.python314.withPackages (
-          #  p: with p; [
-          #  ]
-          #))
+          python3
+          python3Packages.torchvision
         ];
       };
     };
