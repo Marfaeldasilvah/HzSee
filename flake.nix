@@ -10,16 +10,25 @@
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs { inherit system; };
+      python = pkgs.python3.override {
+        packageOverrides = final: prev: {
+          opencv4 = prev.opencv4Full;
+        };
+      };
+      pythonEnv = python.withPackages (
+        ps: with ps; [
+          numpy
+          opencv4Full
+          torchvision
+          ultralytics
+        ]
+      );
     in
     {
       devShells.${system}.default = pkgs.mkShell {
-        buildInputs = with pkgs; [
-          ruff
-          python3
-          python3Packages.torchvision
-          python3Packages.ultralytics
-          python3Packages.opencv4Full
-          python3Packages.numpy
+        buildInputs = [
+          pythonEnv
+          pkgs.ruff
         ];
       };
     };
