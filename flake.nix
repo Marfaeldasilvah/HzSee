@@ -19,6 +19,7 @@
           python3Packages.torchvision
           python3Packages.ultralytics
           python3Packages.opencv4Full
+          python3Packages.numpy
         ];
       };
     };
