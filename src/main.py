@@ -1,30 +1,64 @@
-# import math
 import sys
-
 import cv2 as cv
+from ultralytics import YOLO
 
-#   import cvzone
-#   import ultra
-# from ultralytics import YOLO
+# 1. Carrega o modelo de IA (Baixará o arquivo yolov8n.pt automaticamente na 1ª vez)
+# Deve ser o modelo que tu escolheu que n ta dando o resultado esperado
+# 1. Carrega o modelo focado em Pose (Esqueleto)
+model = YOLO("yolov8n-pose.pt")
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 cap.set(3, 1280)
 cap.set(4, 720)
-
-# model
 
 if not cap.isOpened():
     print("Cannot open camera")
     sys.exit()
+
 while True:
     ret, frame = cap.read()
-
     if not ret:
-        print("Can't receive frame...exiting")
         break
 
-    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-    cv.imshow("frame", gray)
+    frame = cv.flip(frame, 1)
+
+    resultados = model(frame, stream=True, verbose=False)
+
+    for r in resultados:
+        # Verifica se detectou alguém e se os pontos existem
+        if r.keypoints is not None and len(r.keypoints.xy) > 0:
+
+            # Pega as coordenadas da primeira pessoa detectada
+            pontos = r.keypoints.xy[0]
+
+            # Verifica se mapeou o esqueleto até os braços (tamanho > 10)
+            if len(pontos) > 10:
+
+                # --- PULSO ESQUERDO (Índice 9) ---
+                pulso_e_x = int(pontos[9][0])
+                pulso_e_y = int(pontos[9][1])
+
+                # --- PULSO DIREITO (Índice 10) ---
+                pulso_d_x = int(pontos[10][0])
+                pulso_d_y = int(pontos[10][1])
+
+                # Desenha o Pulso Esquerdo em Azul se estiver visível
+                if pulso_e_x != 0 and pulso_e_y != 0:
+                    cv.circle(frame, (pulso_e_x, pulso_e_y), 15, (255, 0, 0), -1)  # Círculo Azul
+                    cv.putText(frame, "Esq", (pulso_e_x - 15, pulso_e_y - 20),
+                               cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+
+                # Desenha o Pulso Direito em Verde se estiver visível
+                if pulso_d_x != 0 and pulso_d_y != 0:
+                    cv.circle(frame, (pulso_d_x, pulso_d_y), 15, (0, 255, 0), -1)  # Círculo Verde
+                    cv.putText(frame, "Dir", (pulso_d_x - 15, pulso_d_y - 20),
+                               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+                # Exibe no terminal para debug
+                # print(f"Esq(X:{pulso_e_x}, Y:{pulso_e_y}) | Dir(X:{pulso_d_x}, Y:{pulso_d_y})")
+
+    cv.imshow("Bateria Virtual - Dois Punhos", frame)
+
     if cv.waitKey(1) == ord("q"):
         break
 
